@@ -9,7 +9,11 @@ public class AccountHttpClient(HttpClient http) : IAccountHttpClient
 {
     public async Task<ValidatedUserDto?> ValidateLoginAsync(LoginRequest request)
     {
-        var response = await http.PostAsJsonAsync("https://ventixe-accountserviceprovider-cdhuf2azb3end8eb.swedencentral-01.azurewebsites.net", request);
+        var response = await http.PostAsJsonAsync(
+            "https://ventixe-accountserviceprovider-cdhuf2azb3end8eb.swedencentral-01.azurewebsites.net/api/accounts/validate-login",
+            request
+        );
+
         if (!response.IsSuccessStatusCode)
             return null;
 
