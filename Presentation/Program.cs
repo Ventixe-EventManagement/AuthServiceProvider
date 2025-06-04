@@ -8,7 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddHttpClient<IAccountHttpClient, AccountHttpClient>();
