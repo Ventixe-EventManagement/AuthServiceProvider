@@ -19,6 +19,7 @@ public class AuthService(IAccountHttpClient accountHttpClient, IConfiguration co
 
         var claims = new List<Claim>
         {
+            new Claim(JwtRegisteredClaimNames.Sub, validatedUser.Id),
             new Claim(ClaimTypes.NameIdentifier, validatedUser.Id),
             new Claim(ClaimTypes.Email, validatedUser.Email)
         };
