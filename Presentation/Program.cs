@@ -10,10 +10,22 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 
+//CORS: tillåt frontend från Azure Static Web Apps
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("https://agreeable-stone-0b26cb203.6.azurestaticapps.net")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+// HttpClient och Auth-tjänster
 builder.Services.AddHttpClient<IAccountHttpClient, AccountHttpClient>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// JWT Auth
+// JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -31,24 +43,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 var app = builder.Build();
+
+// Swagger
+app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Event Service API V1");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Auth Service API V1");
     c.RoutePrefix = string.Empty;
 });
 
-app.MapOpenApi();
-
-app.UseSwagger();
-
+// Pipeline
 app.UseHttpsRedirection();
-app.UseCors(x => x
-    .AllowAnyOrigin()
-    .AllowAnyMethod()
-    .AllowAnyHeader());
-
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
+
 app.Run();
