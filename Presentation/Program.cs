@@ -1,3 +1,4 @@
+using Azure.Identity;
 using Business.Interfaces;
 using Business.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -6,11 +7,15 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load secrets from Azure Key Vault
+var keyVaultUrl = builder.Configuration["KeyVault:Url"];
+builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUrl), new DefaultAzureCredential());
+
 // Add services
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 
-//CORS: tillåt frontend från Azure Static Web Apps
+// CORS: Allow frontend from Azure Static Web Apps
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -21,11 +26,11 @@ builder.Services.AddCors(options =>
     });
 });
 
-// HttpClient och Auth-tjänster
+// HttpClient and Auth services
 builder.Services.AddHttpClient<IAccountHttpClient, AccountHttpClient>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// JWT Authentication
+// JWT Authentication using secrets from Key Vault
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -52,7 +57,7 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty;
 });
 
-// Pipeline
+// Middleware
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
